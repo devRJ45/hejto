@@ -47,8 +47,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     String stringSession = await storage.read(key: 'session') ?? '';
 
     if (stringCookies.length == 0 || stringSession == null) {
-      log('[Loading] session not found in device');
-
       Navigator.of(context).pushReplacement(_createRoute(LoginScreen()));
       return;
     }
@@ -59,7 +57,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     HejtoApiService.instance.loadSession(cookies, session);
 
-    log('[Loading] session is loaded');
     Navigator.of(context).pushReplacement(_createRoute(AccountScreen()));
   }
 

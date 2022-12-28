@@ -19,6 +19,8 @@ class _AccountScreenState extends State<AccountScreen> {
     super.initState();
 
     _username = '...';
+
+    fetchAccount();
   }
 
   void fetchAccount () async {
@@ -33,10 +35,8 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
-
-    fetchAccount();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Account screen")),

@@ -56,6 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
       cookiesMap[cookie.name] = cookie.value;
     }
 
+    HejtoApiService.instance.apiConfig.updateCookies(cookiesMap);
+
     bool isLoggedIn = await HejtoApiService.instance.tryLogin(cookiesMap);
 
     if (isLoggedIn) {

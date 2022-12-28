@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 
+import 'api_config.dart';
 import 'models/models.dart';
 
 enum RequestMethod {
@@ -13,41 +15,38 @@ enum RequestMethod {
 
 class ApiRequest {
 
+  final ApiConfig apiConfig;
+
   final Uri uri;
   final RequestMethod method;
 
-  Map<String, String>? headers;
-  Map<String, String>? cookies;
-  Session? session;
-  bool useBearerAuth;
+  Map<String, String> headers = {};
+  Map<String, String> cookies = {};
+  bool useCookiesAuth;
 
-  ApiRequest(this.uri, {
+  ApiRequest(this.apiConfig, this.uri, {
     this.method = RequestMethod.GET,
-    this.headers,
-    this.cookies,
-    this.session,
-    this.useBearerAuth = false
+    this.useCookiesAuth = false
   }) {
-    headers ??= {};
 
-    headers?['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36';
+    headers['User-Agent'] = apiConfig.useragent;
 
-    if (cookies != null && !useBearerAuth) {
-      headers?['Cookie'] = '';
+    if (useCookiesAuth) {
+      headers['Cookie'] = '';
 
-      cookies!.forEach((key, value) {
-        String oldValue = headers?['Cookie'] ?? '';
-        if (oldValue.length == 0) {
-          headers?['Cookie'] = '${key}=${value}';
+      apiConfig.cookies.forEach((key, value) {
+        String oldValue = headers['Cookie'] ?? '';
+        if (oldValue.isEmpty) {
+          headers['Cookie'] = '$key=$value';
         } else {
-          headers?['Cookie'] = '${oldValue}; ${key}=${value}';
+          headers['Cookie'] = '$oldValue; $key=$value';
         }
       });
     }
 
-    if (useBearerAuth) {
-      String accessToken = session?.accessToken ?? '';
-      headers?['authorization'] = 'Bearer ${accessToken}';
+    if (!useCookiesAuth) {
+      String accessToken = apiConfig.session.accessToken ?? '';
+      headers['authorization'] = 'Bearer $accessToken';
     }
   }
 

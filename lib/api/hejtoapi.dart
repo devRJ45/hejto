@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:hejto/api/api_config.dart';
 import 'package:hejto/api/api_request.dart';
 import 'package:hejto/api/models/models.dart';
 
@@ -7,10 +8,7 @@ class HejtoApi {
 
   static const String SESSION_URL = 'https://www.hejto.pl/api/auth/session';
 
-  //TODO (RJ45): move to config class
-  Map<String, String>? cookies;
-  Session? session;
-
+  ApiConfig apiConfig = ApiConfig(host: 'api.hejto.pl');
   Function(Map<String, String>, Session) _saveSession = (cookies, session) => {};
 
   HejtoApi () {
@@ -18,13 +16,13 @@ class HejtoApi {
   }
 
   void loadSession (Map<String, String> cookies, Session session) {
-    this.cookies = cookies;
-    this.session = session;
+    apiConfig.updateCookies(cookies);
+    apiConfig.updateSession(session);
   }
 
   setSession (Map<String, String> cookies, Session session) {
-    this.cookies = cookies;
-    this.session = session;
+    apiConfig.updateCookies(cookies);
+    apiConfig.updateSession(session);
 
     _saveSession(cookies, session);
   }
@@ -34,7 +32,7 @@ class HejtoApi {
   }
 
   Future<bool> tryLogin (Map<String, String> cookies) async {
-    Map<String, dynamic> result = await ApiRequest(Uri.parse(SESSION_URL), cookies: cookies).request();
+    Map<String, dynamic> result = await ApiRequest(apiConfig, Uri.parse(SESSION_URL), useCookiesAuth: true).request();
     Session session = Session.fromJson(result);
 
     if (session.accessToken == null) {
@@ -47,7 +45,9 @@ class HejtoApi {
   }
 
   Future<Account> getAccount () async {
-    Map<String, dynamic> result = await ApiRequest(Uri.parse('https://api.hejto.pl/account'), cookies: cookies, session: session, useBearerAuth: true).request();
+    Uri uri = Uri.https(apiConfig.host, 'account');
+
+    Map<String, dynamic> result = await ApiRequest(apiConfig, uri).request();
     return Account.fromJson(result);
   }
 }
